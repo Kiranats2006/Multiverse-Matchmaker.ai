@@ -3,6 +3,8 @@ const cors=require('cors');
 const mongoose=require('mongoose');
 
 const userRoutes=require('./routes/user')
+const geminiRoutes=require('./routes/geminiRoutes')
+const matchRoutes=require('./routes/matchRoutes')
 
 require('dotenv').config();
 const app=express();
@@ -12,6 +14,8 @@ const PORT=8080;
 
 
 app.use('/api/user', userRoutes);
+app.use("/api/profiles", geminiRoutes);
+app.use("/api/matches", matchRoutes);
 
 mongoose.connect(process.env.MONGO_URI).then(()=>{
     console.log("Connected to MongoDB");
