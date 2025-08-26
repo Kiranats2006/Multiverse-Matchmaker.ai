@@ -6,7 +6,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const generateProfiles = async (user) => {
   const model = genAI.getGenerativeModel({ 
         model: "gemini-2.5-flash",
-        temperature: 0.7
+        temperature: 0.7,
+        top_p: 0.9,
    });
 
   const prompt = `
