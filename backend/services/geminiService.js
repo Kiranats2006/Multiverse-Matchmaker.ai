@@ -4,7 +4,10 @@ require("dotenv").config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const generateProfiles = async (user) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-flash",
+        temperature: 0.7
+   });
 
   const prompt = `
 You are an AI matchmaker in the Marvel multiverse.
