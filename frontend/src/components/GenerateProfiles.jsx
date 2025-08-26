@@ -2,6 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import axios from "axios";
 
+const parseProfileString = (str) => {
+  const match = str.match(/^(.+?) \((.+?), (.+?)\)$/);
+  if (!match) return { name: str, bio: "Bio not provided", hobbies: ["Unknown"], universe: "Unknown", age: null };
+};
+
 const GenerateProfiles = ({ onSwipeRight }) => {
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -14,15 +19,30 @@ const GenerateProfiles = ({ onSwipeRight }) => {
       try {
         const userId = localStorage.getItem("userId");
         const { data } = await axios.get(`http://localhost:8080/api/profiles/generateProfiles/${userId}`);
-
-        setProfiles(data);
+        
+        // Check if data is already in object format or needs parsing
+        const profilesData = data.map(profile => {
+          if (typeof profile === "string") {
+            return parseProfileString(profile);
+          } else {
+            // Ensure all required fields exist
+            return {
+              name: profile.name || "Unknown",
+              age: profile.age || null,
+              universe: profile.universe || "Unknown",
+              bio: profile.bio || "Bio not provided",
+              hobbies: profile.hobbies || ["Unknown"]
+            };
+          }
+        });
+        
+        setProfiles(profilesData);
       } catch (error) {
         console.error("Error fetching profiles:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchProfiles();
   }, []);
 
@@ -31,10 +51,8 @@ const GenerateProfiles = ({ onSwipeRight }) => {
       if (direction === "right" && onSwipeRight) {
         onSwipeRight(profiles[currentIndex].name);
       }
-
       setLastDirection(direction);
       setSwipeAnimation(direction);
-
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1);
         setSwipeAnimation(null);
@@ -111,8 +129,19 @@ const GenerateProfiles = ({ onSwipeRight }) => {
             <h2 className="text-2xl font-bold text-yellow-400" style={{ fontFamily: "'Bangers', cursive" }}>
               {currentProfile.name}
             </h2>
-            <p className="text-sm text-gray-300">{currentProfile.age} years old</p>
-            <p className="mt-2 text-gray-200">{currentProfile.bio}</p>
+            {currentProfile.age && (
+              <p className="text-sm text-gray-300">{currentProfile.age} years old</p>
+            )}
+
+            {currentProfile.bio && (
+              <p className="mt-2 text-gray-200"><strong>Bio:</strong> {currentProfile.bio}</p>
+            )}
+            {currentProfile.hobbies && (
+              <p className="mt-1 text-gray-200"><strong>Hobbies:</strong> {currentProfile.hobbies.join(", ")}</p>
+            )}
+            {currentProfile.universe && (
+              <p className="mt-1 text-gray-200"><strong>Universe:</strong> {currentProfile.universe}</p>
+            )}
           </div>
           
           <div className="flex justify-between mt-4">
