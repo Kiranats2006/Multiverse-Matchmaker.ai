@@ -3,38 +3,37 @@ require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const generateProfiles = async () => {
+const generateProfiles = async (user) => {
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `
-    Generate 25 fictional dating profiles with Marvel superhero themes.
-    Each profile should have: name, age, short bio, and 2 hobbies.
+    You are an AI matchmaker in the Marvel multiverse. 
+    The user’s data is:
+    - Username: ${user.username}
+    - Bio: ${user.bio}
+    - Interests: ${user.interests.join(", ")}
+
+    Based on this, generate 10 potential matches from different Marvel multiverses. 
+    Each match must have:
+    - name
+    - age
+    - short bio (with multiverse twist)
+    - 2 hobbies
+    - which Marvel universe they belong to (e.g. Earth-616, Earth-1610, etc.)
+
     Return ONLY valid JSON (array of objects).
   `;
 
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
 
-    // Remove markdown fences if they exist
-    let cleanText = text.replace(/```json\n?|\n?```/g, "");
+    text = text.replace(/```json\n?|\n?```/g, ""); // cleanup formatting
 
-    // Parse JSON safely
-    let data;
-    try {
-      data = JSON.parse(cleanText);
-    } catch (err) {
-      console.error("❌ JSON parse failed. Raw response (first 500 chars):\n", cleanText.slice(0, 500));
-      cleanText = cleanText
-        .replace(/,\s*}/g, "}")   // remove trailing commas
-        .replace(/,\s*]/g, "]");  // remove trailing commas
-      data = JSON.parse(cleanText);
-    }
-
-    return data;
+    return JSON.parse(text);
   } catch (error) {
-    console.error("Error generating profiles:", error);
+    console.error("❌ Error generating personalized profiles:", error);
     throw error;
   }
 };

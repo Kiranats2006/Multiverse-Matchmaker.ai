@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
-import axios from "axios";   // ✅ import axios
+import axios from "axios";
 
-const GenerateProfiles = ({ onSwipeRight }) => {   // ✅ accept callback
+const GenerateProfiles = ({ onSwipeRight }) => {
   const [profiles, setProfiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -12,7 +12,9 @@ const GenerateProfiles = ({ onSwipeRight }) => {   // ✅ accept callback
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const { data } = await axios.get("http://localhost:8080/api/profiles/generateProfiles");
+        const userId = localStorage.getItem("userId");
+        const { data } = await axios.get(`http://localhost:8080/api/profiles/generateProfiles/${userId}`);
+
         setProfiles(data);
       } catch (error) {
         console.error("Error fetching profiles:", error);
@@ -27,7 +29,7 @@ const GenerateProfiles = ({ onSwipeRight }) => {   // ✅ accept callback
   const handleSwipe = (direction) => {
     if (currentIndex < profiles.length - 1) {
       if (direction === "right" && onSwipeRight) {
-        onSwipeRight(profiles[currentIndex].name);  // ✅ notify parent
+        onSwipeRight(profiles[currentIndex].name);
       }
 
       setLastDirection(direction);
