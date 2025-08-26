@@ -8,6 +8,7 @@ const generateProfiles = async (user) => {
         model: "gemini-2.5-flash",
         temperature: 0.7,
         top_p: 0.9,
+        top_k: 50 
    });
 
   const prompt = `
